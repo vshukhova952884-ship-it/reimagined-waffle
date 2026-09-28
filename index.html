@@ -1,3591 +1,653 @@
 <!doctype html>
-
 <html lang="ru">
-
 <head>
-
-<meta charset="utf-8">
-
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-
-<title>NESTBORN — Spider Hybrid v4</title>
-
-<style>
-
-*{box-sizing:border-box}
-
-html,body{
-
-  margin:0;
-
-  width:100%;
-
-  height:100%;
-
-  overflow:hidden;
-
-  background:#0b0d0a;
-
-  color:#eee;
-
-  font-family:Arial,sans-serif;
-
-}
-
-button{
-
-  font:inherit;
-
-}
-
-#game{
-
-  position:fixed;
-
-  inset:0;
-
-}
-
-#game canvas{
-
-  display:block;
-
-  width:100%;
-
-  height:100%;
-
-}
-
-/* =========================
-
-   LOBBY
-
-========================= */
-
-#lobby{
-
-  position:fixed;
-
-  inset:0;
-
-  z-index:20;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  background:
-
-    radial-gradient(
-
-      circle at 50% 40%,
-
-      rgba(75,85,60,.16),
-
-      transparent 38%
-
-    ),
-
-    linear-gradient(
-
-      180deg,
-
-      rgba(8,10,7,.82),
-
-      rgba(8,10,7,.96)
-
-    );
-
-}
-
-.panel{
-
-  width:min(430px,88vw);
-
-  padding:34px 28px;
-
-  border:1px solid rgba(210,190,140,.22);
-
-  border-radius:18px;
-
-  background:rgba(19,21,17,.88);
-
-  box-shadow:
-
-    0 18px 70px rgba(0,0,0,.55);
-
-  text-align:center;
-
-  backdrop-filter:blur(8px);
-
-}
-
-h1{
-
-  margin:0;
-
-  font-size:42px;
-
-  letter-spacing:8px;
-
-  font-weight:800;
-
-}
-
-.sub{
-
-  margin:8px 0 26px;
-
-  color:#aaa;
-
-  font-size:14px;
-
-  letter-spacing:1px;
-
-}
-
-.primary{
-
-  width:100%;
-
-  padding:14px 16px;
-
-  margin:6px 0;
-
-  border:1px solid #6c6149;
-
-  border-radius:10px;
-
-  background:#302c23;
-
-  color:#eee;
-
-  cursor:pointer;
-
-  transition:.15s;
-
-}
-
-.primary:hover{
-
-  background:#403a2e;
-
-  border-color:#9b8b67;
-
-}
-
-.primary:active{
-
-  transform:scale(.985);
-
-}
-
-.primary:disabled{
-
-  opacity:.55;
-
-  cursor:wait;
-
-}
-
-.hint{
-
-  margin-top:14px;
-
-  color:#777;
-
-  font-size:12px;
-
-  line-height:1.5;
-
-}
-
-#loading{
-
-  display:none;
-
-  margin-top:14px;
-
-  color:#b8ad91;
-
-  font-size:13px;
-
-}
-
-#error{
-
-  display:none;
-
-  margin-top:16px;
-
-  padding:12px;
-
-  border-radius:9px;
-
-  background:#321f1f;
-
-  color:#e8b5b5;
-
-  font-size:12px;
-
-  text-align:left;
-
-  white-space:pre-wrap;
-
-}
-
-/* =========================
-
-   HUD
-
-========================= */
-
-#hud{
-
-  display:none;
-
-  position:fixed;
-
-  inset:0;
-
-  z-index:10;
-
-  pointer-events:none;
-
-}
-
-.stats{
-
-  position:absolute;
-
-  left:16px;
-
-  top:16px;
-
-  width:190px;
-
-  padding:12px;
-
-  border-radius:12px;
-
-  background:rgba(10,12,9,.68);
-
-  border:1px solid rgba(255,255,255,.08);
-
-}
-
-.stat{
-
-  margin:6px 0;
-
-}
-
-.label{
-
-  display:flex;
-
-  justify-content:space-between;
-
-  font-size:11px;
-
-  color:#bbb;
-
-  margin-bottom:4px;
-
-}
-
-.bar{
-
-  height:7px;
-
-  background:#292c27;
-
-  border-radius:8px;
-
-  overflow:hidden;
-
-}
-
-.fill{
-
-  height:100%;
-
-  width:50%;
-
-  background:#b9a36e;
-
-}
-
-#toast{
-
-  position:absolute;
-
-  left:50%;
-
-  bottom:28px;
-
-  transform:translateX(-50%);
-
-  padding:9px 15px;
-
-  border-radius:9px;
-
-  background:rgba(8,10,7,.8);
-
-  opacity:0;
-
-  transition:.2s;
-
-}
-
-#controls{
-
-  position:absolute;
-
-  right:15px;
-
-  bottom:15px;
-
-  display:flex;
-
-  gap:8px;
-
-  pointer-events:auto;
-
-}
-
-.ctrl{
-
-  width:54px;
-
-  height:54px;
-
-  border-radius:50%;
-
-  border:1px solid rgba(255,255,255,.14);
-
-  background:rgba(20,22,18,.72);
-
-  color:#eee;
-
-}
-
-#touchMove{
-
-  position:absolute;
-
-  left:20px;
-
-  bottom:20px;
-
-  width:130px;
-
-  height:130px;
-
-  border-radius:50%;
-
-  border:1px solid rgba(255,255,255,.12);
-
-  background:rgba(20,22,18,.35);
-
-  pointer-events:auto;
-
-  display:none;
-
-}
-
-#touchStick{
-
-  position:absolute;
-
-  left:40px;
-
-  top:40px;
-
-  width:50px;
-
-  height:50px;
-
-  border-radius:50%;
-
-  background:rgba(210,195,155,.3);
-
-}
-
-/* =========================
-
-   MOBILE
-
-========================= */
-
-@media(max-width:700px){
-
-  h1{
-
-    font-size:34px;
-
-  }
-
-  .panel{
-
-    padding:28px 22px;
-
-  }
-
-  #touchMove{
-
-    display:block;
-
-  }
-
-  #controls{
-
-    display:none;
-
-  }
-
-}
-
-</style>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>NESTBORN — Spider Hybrid v4</title>
+  <style>
+    :root {
+      --bg: #0b0d0a;
+      --panel: rgba(18, 20, 17, 0.9);
+      --panel-border: rgba(210, 190, 140, 0.28);
+      --gold: #d0b77b;
+      --gold-soft: rgba(208, 183, 123, 0.35);
+      --text: #efefe9;
+      --muted: #a7a29a;
+      --danger: #e8b5b5;
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      position: relative;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    #game {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
+
+    #game canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 18%, rgba(68, 77, 58, 0.25), transparent 35%), var(--bg);
+    }
+
+    #lobby {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(85, 92, 70, 0.2), transparent 38%),
+        linear-gradient(180deg, rgba(8, 10, 7, 0.84), rgba(8, 10, 7, 0.96));
+    }
+
+    .panel {
+      width: min(430px, 88vw);
+      padding: 34px 28px;
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 18px 70px var(--shadow);
+      text-align: center;
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 42px);
+      letter-spacing: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .sub {
+      margin: 8px 0 26px;
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .primary {
+      width: 100%;
+      padding: 14px 16px;
+      margin: 6px 0;
+      border: 1px solid #6c6149;
+      border-radius: 10px;
+      background: #302c23;
+      color: var(--text);
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .primary:hover {
+      background: #403a2e;
+      border-color: #9b8b67;
+    }
+
+    .primary:active {
+      transform: scale(0.985);
+    }
+
+    .primary:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+
+    .hint {
+      margin-top: 14px;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    #loading {
+      display: none;
+      margin-top: 14px;
+      color: #b8ad91;
+      font-size: 13px;
+    }
+
+    #error {
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 9px;
+      background: #321f1f;
+      color: var(--danger);
+      font-size: 12px;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+
+    #hud {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .stats {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      width: 190px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(10, 12, 9, 0.68);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stat {
+      margin: 6px 0;
+    }
+
+    .label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #bbb;
+      margin-bottom: 4px;
+    }
+
+    .bar {
+      height: 7px;
+      background: #292c27;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(90deg, #d0b77b, #f3d494);
+    }
+
+    #toast {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      padding: 9px 15px;
+      border-radius: 9px;
+      background: rgba(8,10,7,0.8);
+      opacity: 0;
+      transition: 0.2s ease;
+      pointer-events: none;
+    }
+
+    #controls {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .ctrl {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(20,22,18,0.72);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    #touchMove {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(20,22,18,0.35);
+      pointer-events: auto;
+      display: none;
+    }
+
+    #touchStick {
+      position: absolute;
+      left: 40px;
+      top: 40px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(210,195,155,0.3);
+      transform: translate(-50%, -50%);
+    }
+
+    @media (max-width: 700px) {
+      .panel { padding: 28px 22px; }
+      #touchMove { display: block; }
+      #controls { display: none; }
+    }
+  </style>
 </head>
-
 <body>
+  <div id="game"></div>
 
-<!-- =========================
+  <div id="lobby">
+    <div class="panel" id="lobbyPanel">
+      <h1>NESTBORN</h1>
+      <div class="sub">Spider Hybrid · The Hollow</div>
 
-     3D CONTAINER
+      <button class="primary" id="start">Войти в логово</button>
+      <button class="primary" id="continue">Продолжить</button>
+      <button class="primary" id="fullLobby">Полный экран</button>
 
-========================= -->
+      <div id="loading">Создаём логово…</div>
+      <div id="error"></div>
 
-<div id="game"></div>
-
-<!-- =========================
-
-     LOBBY
-
-========================= -->
-
-<div id="lobby">
-
-  <div class="panel" id="lobbyPanel">
-
-    <h1>NESTBORN</h1>
-
-    <div class="sub">
-
-      Spider Hybrid · The Hollow
-
+      <div class="hint">v4 · Лобби и 3D-сцена запускаются независимо друг от друга</div>
     </div>
-
-    <button class="primary" id="start">
-
-      Войти в логово
-
-    </button>
-
-    <button class="primary" id="continue">
-
-      Продолжить
-
-    </button>
-
-    <button class="primary" id="fullLobby">
-
-      Полный экран
-
-    </button>
-
-    <div id="loading">
-
-      Создаём логово…
-
-    </div>
-
-    <div id="error"></div>
-
-    <div class="hint">
-
-      v4 · Лобби и 3D-сцена запускаются независимо друг от друга
-
-    </div>
-
   </div>
 
-</div>
-
-<!-- =========================
-
-     HUD
-
-========================= -->
-
-<div id="hud">
-
-  <div class="stats">
-
-    <div class="stat">
-
-      <div class="label">
-
-        <span>Голод</span>
-
-        <span id="hungerText">100</span>
-
+  <div id="hud">
+    <div class="stats">
+      <div class="stat">
+        <div class="label"><span>Голод</span><span id="hungerText">100</span></div>
+        <div class="bar"><div class="fill" id="hungerFill"></div></div>
       </div>
 
-      <div class="bar">
-
-        <div class="fill" id="hungerFill"></div>
-
+      <div class="stat">
+        <div class="label"><span>Жажда</span><span id="thirstText">100</span></div>
+        <div class="bar"><div class="fill" id="thirstFill"></div></div>
       </div>
 
+      <div class="stat">
+        <div class="label"><span>Энергия</span><span id="energyText">100</span></div>
+        <div class="bar"><div class="fill" id="energyFill"></div></div>
+      </div>
     </div>
 
-    <div class="stat">
+    <div id="toast"></div>
 
-      <div class="label">
-
-        <span>Жажда</span>
-
-        <span id="thirstText">100</span>
-
-      </div>
-
-      <div class="bar">
-
-        <div class="fill" id="thirstFill"></div>
-
-      </div>
-
+    <div id="touchMove">
+      <div id="touchStick"></div>
     </div>
 
-    <div class="stat">
-
-      <div class="label">
-
-        <span>Энергия</span>
-
-        <span id="energyText">100</span>
-
-      </div>
-
-      <div class="bar">
-
-        <div class="fill" id="energyFill"></div>
-
-      </div>
-
+    <div id="controls">
+      <button class="ctrl" id="fs">⛶</button>
+      <button class="ctrl" id="save">💾</button>
     </div>
-
   </div>
 
-  <div id="toast"></div>
-
-  <!-- Mobile joystick -->
-
-  <div id="touchMove">
-
-    <div id="touchStick"></div>
-
-  </div>
-
-  <div id="controls">
-
-    <button class="ctrl" id="fs">
-
-      ⛶
-
-    </button>
-
-    <button class="ctrl" id="save">
-
-      💾
-
-    </button>
-
-  </div>
-
-</div>
-
-<!-- =========================
-
-     THREE.JS
-
-========================= -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-<script>
-
-'use strict';
-
-(() => {
-
-  /*
-
-  ============================================================
-
-  NESTBORN v4
-
-  ============================================================
-
-  Главное отличие от старой версии:
-
-  ЛОББИ
-
-      ↓
-
-  кнопка
-
-      ↓
-
-  enterGame()
-
-      ↓
-
-  setupGame()
-
-      ↓
-
-  успешная загрузка
-
-      ↓
-
-  HUD
-
-      ↓
-
-  единственный gameLoop()
-
-  setupGame() НЕ вызывается при загрузке страницы.
-
-  ============================================================
-
-  */
-
-  /* =========================================================
-
-     SHORTCUT
-
-  ========================================================= */
-
-  const $ = id => document.getElementById(id);
-
-  /* =========================================================
-
-     THREE.JS VARIABLES
-
-  ========================================================= */
-
-  let scene = null;
-
-  let camera = null;
-
-  let renderer = null;
-
-  let clock = null;
-
-  let player = null;
-
-  /* =========================================================
-
-     GAME STATE
-
-  ========================================================= */
-
-  let gameInitialized = false;
-
-  let gameStarting = false;
-
-  let running = false;
-
-  let paused = false;
-
-  let loopStarted = false;
-
-  let keys = Object.create(null);
-
-  /* =========================================================
-
-     CAMERA
-
-  ========================================================= */
-
-  let camYaw = 0;
-
-  let camPitch = .34;
-
-  let camDist = 7;
-
-  let last = 0;
-
-  /* =========================================================
-
-     PLAYER STATS
-
-  ========================================================= */
-
-  const stats = {
-
-    hunger:100,
-
-    thirst:100,
-
-    energy:100
-
-  };
-
-  /* =========================================================
-
-     MATERIALS
-
-  ========================================================= */
-
-  const mats = {};
-
-  /* =========================================================
-
-     LOBBY
-
-  ========================================================= */
-
-  function setLobbyBusy(busy){
-
-    $('start').disabled = busy;
-
-    $('continue').disabled = busy;
-
-    $('fullLobby').disabled = busy;
-
-    $('loading').style.display =
-
-      busy ? 'block' : 'none';
-
-  }
-
-  function showError(message){
-
-    $('loading').style.display = 'none';
-
-    $('error').style.display = 'block';
-
-    $('error').textContent =
-
-      'Не удалось запустить 3D-сцену.\n\n' +
-
-      message +
-
-      '\n\nПроверь, что файл открыт в браузере и есть доступ к Three.js.';
-
-  }
-
-  /*
-
-  ============================================================
-
-  ЭТО ЕДИНСТВЕННОЕ МЕСТО, ГДЕ ЗАПУСКАЕТСЯ ИГРА
-
-  ============================================================
-
-  */
-
-  function enterGame(loadSave){
-
-    if(gameStarting || gameInitialized){
-
-      return;
-
-    }
-
-    gameStarting = true;
-
-    setLobbyBusy(true);
-
-    $('error').style.display = 'none';
-
-    /*
-
-    Маленькая задержка нужна, чтобы браузер успел
-
-    отрисовать "Создаём логово…" ДО тяжёлого запуска Three.js.
-
-    */
-
-    setTimeout(() => {
-
-      try{
-
-        /*
-
-        Проверяем Three.js.
-
-        */
-
-        if(typeof THREE === 'undefined'){
-
-          throw new Error(
-
-            'Three.js не загрузился.'
-
-          );
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    'use strict';
+
+    (() => {
+      const $ = id => document.getElementById(id);
+
+      const stats = { hunger: 100, thirst: 100, energy: 100 };
+      const keys = Object.create(null);
+
+      let scene = null;
+      let camera = null;
+      let renderer = null;
+      let clock = null;
+      let player = null;
+      let world = null;
+      let gameInitialized = false;
+      let gameStarting = false;
+      let running = false;
+      let paused = false;
+      let loopStarted = false;
+
+      let camYaw = 0;
+      let camPitch = 0.5;
+      let lastTime = 0;
+      let moveX = 0;
+      let moveZ = 0;
+
+      function setLobbyBusy(busy) {
+        $('start').disabled = busy;
+        $('continue').disabled = busy;
+        $('fullLobby').disabled = busy;
+        $('loading').style.display = busy ? 'block' : 'none';
+      }
+
+      function showError(message) {
+        $('loading').style.display = 'none';
+        $('error').style.display = 'block';
+        $('error').textContent = 'Не удалось запустить 3D-сцену.\n\n' + message + '\n\nПроверь, что файл открыт в браузере и есть доступ к Three.js.';
+      }
+
+      function updateHud() {
+        $('hungerText').textContent = Math.round(stats.hunger);
+        $('thirstText').textContent = Math.round(stats.thirst);
+        $('energyText').textContent = Math.round(stats.energy);
+
+        $('hungerFill').style.width = stats.hunger + '%';
+        $('thirstFill').style.width = stats.thirst + '%';
+        $('energyFill').style.width = stats.energy + '%';
+      }
+
+      function toast(message) {
+        const toast = $('toast');
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+          toast.style.opacity = '0';
+        }, 1800);
+      }
+
+      function resetStats() {
+        stats.hunger = 100;
+        stats.thirst = 100;
+        stats.energy = 100;
+        updateHud();
+      }
+
+      function saveGame() {
+        try {
+          const data = {
+            hunger: stats.hunger,
+            thirst: stats.thirst,
+            energy: stats.energy,
+            playerX: player ? player.position.x : 0,
+            playerY: player ? player.position.y : 0,
+            playerZ: player ? player.position.z : 0
+          };
+          localStorage.setItem('nestborn-save-v4', JSON.stringify(data));
+          toast('Сохранение готово.');
+        } catch (e) {
+          console.error(e);
+          toast('Не удалось сохранить.');
         }
+      }
 
-        /*
-
-        Создаём сцену.
-
-        */
-
-        setupGame();
-
-        /*
-
-        Загружаем сохранение
-
-        или создаём новые значения.
-
-        */
-
-        if(loadSave){
-
-          loadGame();
-
-        }else{
-
+      function loadGame() {
+        try {
+          const raw = localStorage.getItem('nestborn-save-v4');
+          if (!raw) {
+            resetStats();
+            return;
+          }
+          const data = JSON.parse(raw);
+          stats.hunger = Number.isFinite(data.hunger) ? data.hunger : 100;
+          stats.thirst = Number.isFinite(data.thirst) ? data.thirst : 100;
+          stats.energy = Number.isFinite(data.energy) ? data.energy : 100;
+          if (player) {
+            player.position.set(
+              Number.isFinite(data.playerX) ? data.playerX : 0,
+              Number.isFinite(data.playerY) ? data.playerY : 0,
+              Number.isFinite(data.playerZ) ? data.playerZ : 0
+            );
+          }
+          updateHud();
+        } catch (e) {
+          console.error(e);
           resetStats();
+        }
+      }
 
+      async function fullscreen() {
+        try {
+          if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen?.();
+          } else {
+            await document.exitFullscreen?.();
+          }
+        } catch (e) {
+          console.warn('Fullscreen unavailable', e);
+        }
+      }
+
+      function setupGame() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b0d0a);
+        scene.fog = new THREE.Fog(0x0b0d0a, 12, 45);
+
+        camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(0, 2.3, 9);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        $('game').appendChild(renderer.domElement);
+
+        clock = new THREE.Clock();
+
+        const hemi = new THREE.HemisphereLight(0xbbd3a6, 0x0b0d0a, 1.2);
+        scene.add(hemi);
+
+        const dir = new THREE.DirectionalLight(0xf8dca9, 1.2);
+        dir.position.set(6, 12, 9);
+        dir.castShadow = true;
+        dir.shadow.mapSize.set(1024, 1024);
+        scene.add(dir);
+
+        const ground = new THREE.Mesh(
+          new THREE.CircleGeometry(18, 64),
+          new THREE.MeshStandardMaterial({ color: 0x171b16, roughness: 0.95, metalness: 0.05 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        const ring = new THREE.Mesh(
+          new THREE.TorusGeometry(7.5, 0.18, 14, 100),
+          new THREE.MeshStandardMaterial({ color: 0x7d6a47, emissive: 0x17120a, roughness: 0.8 })
+        );
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 0.04;
+        scene.add(ring);
+
+        world = new THREE.Group();
+        scene.add(world);
+
+        for (let i = 0; i < 18; i++) {
+          const pillar = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.7, 0.9, 2.5 + Math.random() * 2.3, 10),
+            new THREE.MeshStandardMaterial({ color: 0x2d322f, roughness: 0.9, metalness: 0.1 })
+          );
+          const radius = 5 + Math.random() * 7;
+          const angle = (i / 18) * Math.PI * 2;
+          pillar.position.set(Math.cos(angle) * radius, 1.6, Math.sin(angle) * radius);
+          pillar.castShadow = true;
+          pillar.receiveShadow = true;
+          world.add(pillar);
         }
 
-        /*
-
-        Только после успешной настройки
-
-        считаем игру запущенной.
-
-        */
-
-        gameInitialized = true;
-
-        running = true;
-
-        paused = false;
-
-        /*
-
-        Теперь прячем лобби.
-
-        */
-
-        $('lobby').style.display = 'none';
-
-        $('hud').style.display = 'block';
-
-        /*
-
-        Запускаем единственный цикл.
-
-        */
-
-        startLoopOnce();
-
-        toast('Добро пожаловать домой.');
-
-      }catch(err){
-
-        console.error(
-
-          '[NESTBORN v4]',
-
-          err
-
-        );
-
-        showError(
-
-          err && err.message
-
-            ? err.message
-
-            : String(err)
-
-        );
-
-      }finally{
-
-        gameStarting = false;
-
-        setLobbyBusy(false);
-
-      }
-
-    },30);
-
-  }
-
-  /*
-
-  ============================================================
-
-  BUTTON EVENTS
-
-  ============================================================
-
-  */
-
-  $('start').addEventListener(
-
-    'click',
-
-    () => enterGame(false)
-
-  );
-
-  $('continue').addEventListener(
-
-    'click',
-
-    () => enterGame(true)
-
-  );
-
-  $('fullLobby').addEventListener(
-
-    'click',
-
-    fullscreen
-
-  );
-
-  $('fs').addEventListener(
-
-    'click',
-
-    fullscreen
-
-  );
-
-  $('save').addEventListener(
-
-    'click',
-
-    saveGame
-
-  );
-
-  /* =========================================================
-
-     FULLSCREEN
-
-  ========================================================= */
-
-  async function fullscreen(){
-
-    try{
-
-      if(!document.fullscreenElement){
-
-        await document.documentElement.requestFullscreen?.();
-
-      }else{
-
-        await document.exitFullscreen?.();
-
-      }
-
-    }catch(e){
-
-      toast(
-
-        'Полный экран недоступен в этом браузере.'
-
-      );
-
-    }
-
-  }
-
-  /* =========================================================
-
-     GAME SETUP
-
-  ========================================================= */
-
-  function setupGame(){
-
-    /*
-
-    Защита от повторной инициализации.
-
-    */
-
-    if(gameInitialized || scene){
-
-      return;
-
-    }
-
-    /*
-
-    SCENE
-
-    */
-
-    scene = new THREE.Scene();
-
-    scene.background =
-
-      new THREE.Color(0x11130f);
-
-    scene.fog =
-
-      new THREE.Fog(
-
-        0x11130f,
-
-        18,
-
-        52
-
-      );
-
-    /*
-
-    CAMERA
-
-    */
-
-    camera =
-
-      new THREE.PerspectiveCamera(
-
-        58,
-
-        innerWidth / innerHeight,
-
-        .05,
-
-        100
-
-      );
-
-    /*
-
-    RENDERER
-
-    */
-
-    renderer =
-
-      new THREE.WebGLRenderer({
-
-        antialias:true,
-
-        powerPreference:
-
-          'high-performance'
-
-      });
-
-    renderer.setPixelRatio(
-
-      Math.min(
-
-        devicePixelRatio || 1,
-
-        1.6
-
-      )
-
-    );
-
-    renderer.setSize(
-
-      innerWidth,
-
-      innerHeight
-
-    );
-
-    renderer.shadowMap.enabled = true;
-
-    renderer.shadowMap.type =
-
-      THREE.PCFSoftShadowMap;
-
-    /*
-
-    IMPORTANT:
-
-    Canvas появляется только здесь.
-
-    */
-
-    $('game').appendChild(
-
-      renderer.domElement
-
-    );
-
-    /*
-
-    CLOCK
-
-    */
-
-    clock = new THREE.Clock();
-
-    /*
-
-    BUILD
-
-    */
-
-    buildMaterials();
-
-    buildWorld();
-
-    buildPlayer();
-
-    addGameEvents();
-
-    /*
-
-    Initial camera
-
-    */
-
-    camera.position.set(
-
-      0,
-
-      3.5,
-
-      7
-
-    );
-
-  }
-
-  /* =========================================================
-
-     GAME LOOP
-
-     ========================================================= */
-
-  function startLoopOnce(){
-
-    if(loopStarted){
-
-      return;
-
-    }
-
-    loopStarted = true;
-
-    last = performance.now();
-
-    requestAnimationFrame(
-
-      gameLoop
-
-    );
-
-  }
-
-  /* =========================================================
-
-     MATERIALS
-
-     ========================================================= */
-
-  function buildMaterials(){
-
-    mats.bark =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x3b2d20,
-
-        roughness:1
-
-      });
-
-    mats.barkDark =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x241b14,
-
-        roughness:1
-
-      });
-
-    mats.root =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x493522,
-
-        roughness:1
-
-      });
-
-    mats.floor =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x211b15,
-
-        roughness:1
-
-      });
-
-    mats.web =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0xb9b4a0,
-
-        transparent:true,
-
-        opacity:.3,
-
-        roughness:1,
-
-        side:THREE.DoubleSide
-
-      });
-
-    mats.skin =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x9c806c,
-
-        roughness:.9
-
-      });
-
-    mats.dark =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x181714,
-
-        roughness:1
-
-      });
-
-    mats.leg =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x2a211b,
-
-        roughness:.95
-
-      });
-
-    mats.water =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x6b8580,
-
-        transparent:true,
-
-        opacity:.65,
-
-        roughness:.15
-
-      });
-
-    mats.green =
-
-      new THREE.MeshStandardMaterial({
-
-        color:0x33472b,
-
-        roughness:1
-
-      });
-
-  }
-
-  /* =========================================================
-
-     WORLD
-
-     ========================================================= */
-
-  function buildWorld(){
-
-    /*
-
-    FLOOR
-
-    */
-
-    const floor =
-
-      new THREE.Mesh(
-
-        new THREE.CylinderGeometry(
-
-          10,
-
-          11,
-
-          .7,
-
-          12
-
-        ),
-
-        mats.floor
-
-      );
-
-    floor.position.y = -.45;
-
-    floor.receiveShadow = true;
-
-    scene.add(floor);
-
-    /*
-
-    TREE WALLS
-
-    */
-
-    for(let i=0;i<12;i++){
-
-      const a =
-
-        i / 12 *
-
-        Math.PI *
-
-        2;
-
-      const r = 9.5;
-
-      const wall =
-
-        new THREE.Mesh(
-
-          new THREE.CylinderGeometry(
-
-            1.9,
-
-            2.4,
-
-            16,
-
-            7
-
-          ),
-
-          mats.bark
-
-        );
-
-      wall.position.set(
-
-        Math.cos(a)*r,
-
-        7,
-
-        Math.sin(a)*r
-
-      );
-
-      wall.rotation.z =
-
-        Math.sin(a)*.08;
-
-      wall.rotation.y = a;
-
-      wall.castShadow = true;
-
-      wall.receiveShadow = true;
-
-      scene.add(wall);
-
-    }
-
-    /*
-
-    CEILING
-
-    */
-
-    const ceiling =
-
-      new THREE.Mesh(
-
-        new THREE.CylinderGeometry(
-
-          9.7,
-
-          9.2,
-
-          1,
-
-          12
-
-        ),
-
-        mats.barkDark
-
-      );
-
-    ceiling.position.y = 15;
-
-    ceiling.receiveShadow = true;
-
-    scene.add(ceiling);
-
-    /*
-
-    ROOTS
-
-    */
-
-    for(let i=0;i<9;i++){
-
-      const a =
-
-        i / 9 *
-
-        Math.PI *
-
-        2;
-
-      const root =
-
-        new THREE.Mesh(
-
-          new THREE.CylinderGeometry(
-
-            .35,
-
-            .8,
-
-            7,
-
-            7
-
-          ),
-
-          mats.root
-
-        );
-
-      root.position.set(
-
-        Math.cos(a)*5.4,
-
-        1.2,
-
-        Math.sin(a)*5.4
-
-      );
-
-      root.rotation.z =
-
-        Math.PI/2.3;
-
-      root.rotation.y = a;
-
-      root.castShadow = true;
-
-      scene.add(root);
-
-    }
-
-    /*
-
-    SECOND FLOOR
-
-    */
-
-    const upper =
-
-      new THREE.Mesh(
-
-        new THREE.BoxGeometry(
-
-          6.5,
-
-          .45,
-
-          4.5
-
-        ),
-
-        mats.floor
-
-      );
-
-    upper.position.set(
-
-      0,
-
-      5.3,
-
-      -3.2
-
-    );
-
-    upper.castShadow = true;
-
-    upper.receiveShadow = true;
-
-    scene.add(upper);
-
-    /*
-
-    SLEEPING WEB
-
-    */
-
-    const web =
-
-      new THREE.Mesh(
-
-        new THREE.CircleGeometry(
-
-          2.5,
-
-          32
-
-        ),
-
-        mats.web
-
-      );
-
-    web.rotation.x =
-
-      -Math.PI/2;
-
-    web.position.set(
-
-      0,
-
-      .08,
-
-      -2
-
-    );
-
-    scene.add(web);
-
-    /*
-
-    WATER
-
-    */
-
-    const water =
-
-      new THREE.Mesh(
-
-        new THREE.CylinderGeometry(
-
-          1.1,
-
-          1.1,
-
-          .12,
-
-          24
-
-        ),
-
-        mats.water
-
-      );
-
-    water.position.set(
-
-      -4.3,
-
-      .08,
-
-      1.5
-
-    );
-
-    scene.add(water);
-
-    /*
-
-    HANGING PREY
-
-    */
-
-    for(let i=0;i<3;i++){
-
-      const prey =
-
-        new THREE.Mesh(
-
-          new THREE.SphereGeometry(
-
-            .38,
-
-            10,
-
-            8
-
-          ),
-
-          mats.green
-
-        );
-
-      prey.position.set(
-
-        4.3 + i*.55,
-
-        5.5 - i*.8,
-
-        -1.8
-
-      );
-
-      prey.castShadow = true;
-
-      scene.add(prey);
-
-      const string =
-
-        new THREE.Mesh(
-
-          new THREE.CylinderGeometry(
-
-            .025,
-
-            .025,
-
-            2.5,
-
-            5
-
-          ),
-
-          mats.web
-
-        );
-
-      string.position.set(
-
-        prey.position.x,
-
-        prey.position.y+1.25,
-
-        prey.position.z
-
-      );
-
-      scene.add(string);
-
-    }
-
-    /*
-
-    FOREST OUTSIDE
-
-    */
-
-    buildOutsideForest();
-
-    /*
-
-    LIGHT
-
-    */
-
-    const hemi =
-
-      new THREE.HemisphereLight(
-
-        0x91a58d,
-
-        0x211912,
-
-        1.15
-
-      );
-
-    scene.add(hemi);
-
-    const sun =
-
-      new THREE.DirectionalLight(
-
-        0xffdfad,
-
-        1.5
-
-      );
-
-    sun.position.set(
-
-      5,
-
-      13,
-
-      4
-
-    );
-
-    sun.castShadow = true;
-
-    sun.shadow.mapSize.set(
-
-      1024,
-
-      1024
-
-    );
-
-    scene.add(sun);
-
-    const warm =
-
-      new THREE.PointLight(
-
-        0xd7a86c,
-
-        1.0,
-
-        14
-
-      );
-
-    warm.position.set(
-
-      0,
-
-      4,
-
-      0
-
-    );
-
-    scene.add(warm);
-
-  }
-
-  /* =========================================================
-
-     FOREST
-
-     ========================================================= */
-
-  function buildOutsideForest(){
-
-    const ground =
-
-      new THREE.Mesh(
-
-        new THREE.PlaneGeometry(
-
-          70,
-
-          70
-
-        ),
-
-        new THREE.MeshStandardMaterial({
-
-          color:0x182217,
-
-          roughness:1
-
-        })
-
-      );
-
-    ground.rotation.x =
-
-      -Math.PI/2;
-
-    ground.position.set(
-
-      0,
-
-      -.8,
-
-      24
-
-    );
-
-    ground.receiveShadow = true;
-
-    scene.add(ground);
-
-    for(let i=0;i<28;i++){
-
-      const trunk =
-
-        new THREE.Mesh(
-
-          new THREE.CylinderGeometry(
-
-            .18,
-
-            .35,
-
-            5 + Math.random()*5,
-
-            7
-
-          ),
-
-          mats.bark
-
-        );
-
-      const x =
-
-        (Math.random()-.5)*35;
-
-      const z =
-
-        10 + Math.random()*32;
-
-      trunk.position.set(
-
-        x,
-
-        2.5,
-
-        z
-
-      );
-
-      trunk.castShadow = true;
-
-      scene.add(trunk);
-
-      const crown =
-
-        new THREE.Mesh(
-
-          new THREE.SphereGeometry(
-
-            1.4 + Math.random()*1.2,
-
-            7,
-
-            6
-
-          ),
-
-          mats.green
-
-        );
-
-      crown.position.set(
-
-        x,
-
-        7 + Math.random()*3,
-
-        z
-
-      );
-
-      crown.castShadow = true;
-
-      scene.add(crown);
-
-    }
-
-  }
-
-  /* =========================================================
-
-     CAPSULE
-
-     ========================================================= */
-
-  function makeCapsule(
-
-    radius,
-
-    length,
-
-    material
-
-  ){
-
-    const group =
-
-      new THREE.Group();
-
-    const body =
-
-      new THREE.Mesh(
-
-        new THREE.CylinderGeometry(
-
-          radius,
-
-          radius,
-
-          length,
-
-          10
-
-        ),
-
-        material
-
-      );
-
-    body.castShadow = true;
-
-    body.receiveShadow = true;
-
-    group.add(body);
-
-    const top =
-
-      new THREE.Mesh(
-
-        new THREE.SphereGeometry(
-
-          radius,
-
-          10,
-
-          8
-
-        ),
-
-        material
-
-      );
-
-    top.position.y =
-
-      length/2;
-
-    top.castShadow = true;
-
-    group.add(top);
-
-    const bottom =
-
-      new THREE.Mesh(
-
-        new THREE.SphereGeometry(
-
-          radius,
-
-          10,
-
-          8
-
-        ),
-
-        material
-
-      );
-
-    bottom.position.y =
-
-      -length/2;
-
-    bottom.castShadow = true;
-
-    group.add(bottom);
-
-    return group;
-
-  }
-
-  /* =========================================================
-
-     PLAYER
-
-     ========================================================= */
-
-  function buildPlayer(){
-
-    player =
-
-      new THREE.Group();
-
-    player.position.set(
-
-      0,
-
-      1,
-
-      3.5
-
-    );
-
-    /*
-
-    SPIDER ABDOMEN
-
-    */
-
-    const abdomen =
-
-      new THREE.Mesh(
-
-        new THREE.SphereGeometry(
-
-          1.15,
-
-          16,
-
-          10
-
-        ),
-
-        mats.dark
-
-      );
-
-    abdomen.scale.set(
-
-      1.2,
-
-      .8,
-
-      1.35
-
-    );
-
-    abdomen.position.y =
-
-      .8;
-
-    abdomen.castShadow = true;
-
-    player.add(abdomen);
-
-    /*
-
-    HUMAN TORSO
-
-    */
-
-    const torso =
-
-      makeCapsule(
-
-        .55,
-
-        1.05,
-
-        mats.skin
-
-      );
-
-    torso.position.y =
-
-      1.65;
-
-    player.add(torso);
-
-    /*
-
-    HEAD
-
-    */
-
-    const head =
-
-      new THREE.Mesh(
-
-        new THREE.SphereGeometry(
-
-          .48,
-
-          16,
-
-          12
-
-        ),
-
-        mats.skin
-
-      );
-
-    head.position.y =
-
-      2.55;
-
-    head.castShadow = true;
-
-    player.add(head);
-
-    /*
-
-    8 LEGS
-
-    */
-
-    for(let i=0;i<8;i++){
-
-      const side =
-
-        i < 4
-
-          ? -1
-
-          : 1;
-
-      const row =
-
-        i % 4;
-
-      const leg =
-
-        makeLeg(
-
-          side,
-
-          row
-
-        );
-
-      player.add(leg);
-
-    }
-
-    scene.add(player);
-
-  }
-
-  function makeLeg(
-
-    side,
-
-    row
-
-  ){
-
-    const root =
-
-      new THREE.Group();
-
-    root.position.set(
-
-      side*.7,
-
-      .75,
-
-      (row-1.5)*.62
-
-    );
-
-    /*
-
-    UPPER LEG
-
-    */
-
-    const upper =
-
-      new THREE.Mesh(
-
-        new THREE.CylinderGeometry(
-
-          .11,
-
-          .14,
-
-          1.45,
-
-          7
-
-        ),
-
-        mats.leg
-
-      );
-
-    upper.rotation.z =
-
-      side * 1.05;
-
-    upper.position.x =
-
-      side*.55;
-
-    upper.castShadow = true;
-
-    root.add(upper);
-
-    /*
-
-    LOWER LEG
-
-    */
-
-    const lower =
-
-      new THREE.Mesh(
-
-        new THREE.CylinderGeometry(
-
-          .08,
-
-          .1,
-
-          1.5,
-
-          7
-
-        ),
-
-        mats.leg
-
-      );
-
-    lower.rotation.z =
-
-      side*.55;
-
-    lower.position.set(
-
-      side*1.25,
-
-      -.1,
-
-      side*.05
-
-    );
-
-    lower.castShadow = true;
-
-    root.add(lower);
-
-    return root;
-
-  }
-
-  /* =========================================================
-
-     EVENTS
-
-     ========================================================= */
-
-  function addGameEvents(){
-
-    addEventListener(
-
-      'resize',
-
-      onResize
-
-    );
-
-    /*
-
-    KEYBOARD
-
-    */
-
-    addEventListener(
-
-      'keydown',
-
-      e => {
-
-        keys[e.code] = true;
-
-        if(e.code === 'KeyE'){
-
-          interact();
-
+        const particleGeo = new THREE.BufferGeometry();
+        const particleCount = 250;
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+          positions[i * 3] = (Math.random() - 0.5) * 40;
+          positions[i * 3 + 1] = Math.random() * 18 + 1;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
         }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particles = new THREE.Points(
+          particleGeo,
+          new THREE.PointsMaterial({ color: 0xd8c5a0, size: 0.07, transparent: true, opacity: 0.9 })
+        );
+        scene.add(particles);
 
-        if(e.code === 'Escape'){
+        player = new THREE.Group();
 
-          paused = !paused;
+        const body = new THREE.Mesh(
+          new THREE.SphereGeometry(1.05, 24, 24),
+          new THREE.MeshStandardMaterial({ color: 0x9ea88e, roughness: 0.72, metalness: 0.16 })
+        );
+        body.scale.set(1.3, 1.0, 1.5);
+        body.castShadow = true;
+        player.add(body);
 
-          toast(
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(0.56, 18, 18),
+          new THREE.MeshStandardMaterial({ color: 0xd1c0a0, roughness: 0.82 })
+        );
+        head.position.set(0, 1.0, 0);
+        head.castShadow = true;
+        player.add(head);
 
-            paused
+        const eyeGeo = new THREE.SphereGeometry(0.08, 12, 12);
+        const eyeMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x111111 });
+        const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+        const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+        leftEye.position.set(-0.15, 1.02, 0.48);
+        rightEye.position.set(0.15, 1.02, 0.48);
+        player.add(leftEye, rightEye);
 
-              ? 'Пауза.'
+        player.position.set(0, 0.9, 0);
+        scene.add(player);
 
-              : 'Продолжение.'
-
-          );
-
-        }
-
+        updateHud();
       }
 
-    );
-
-    addEventListener(
-
-      'keyup',
-
-      e => {
-
-        keys[e.code] = false;
-
+      function startLoopOnce() {
+        if (loopStarted) return;
+        loopStarted = true;
+        requestAnimationFrame(loop);
       }
 
-    );
-
-    /*
-
-    CAMERA ZOOM
-
-    */
-
-    renderer.domElement.addEventListener(
-
-      'wheel',
-
-      e => {
-
-        camDist =
-
-          Math.max(
-
-            3.8,
-
-            Math.min(
-
-              11,
-
-              camDist + e.deltaY*.008
-
-            )
-
-          );
-
-      },
-
-      {
-
-        passive:true
-
-      }
-
-    );
-
-    /*
-
-    CAMERA ROTATION
-
-    */
-
-    let dragging = false;
-
-    let px = 0;
-
-    let py = 0;
-
-    renderer.domElement.addEventListener(
-
-      'pointerdown',
-
-      e => {
-
-        dragging = true;
-
-        px = e.clientX;
-
-        py = e.clientY;
-
-        renderer.domElement
-
-          .setPointerCapture?.(
-
-            e.pointerId
-
-          );
-
-      }
-
-    );
-
-    renderer.domElement.addEventListener(
-
-      'pointermove',
-
-      e => {
-
-        if(!dragging){
-
+      function loop() {
+        if (!renderer || !scene || !camera || !player) {
           return;
-
         }
 
-        camYaw -=
-
-          (e.clientX-px)*.006;
-
-        camPitch -=
-
-          (e.clientY-py)*.004;
-
-        camPitch =
-
-          Math.max(
-
-            -.05,
-
-            Math.min(
-
-              1.05,
-
-              camPitch
-
-            )
-
-          );
-
-        px = e.clientX;
-
-        py = e.clientY;
-
-      }
-
-    );
-
-    renderer.domElement.addEventListener(
-
-      'pointerup',
-
-      () => {
-
-        dragging = false;
-
-      }
-
-    );
-
-    renderer.domElement.addEventListener(
-
-      'pointercancel',
-
-      () => {
-
-        dragging = false;
-
-      }
-
-    );
-
-    setupTouchControls();
-
-  }
-
-  /* =========================================================
-
-     MOBILE JOYSTICK
-
-     ========================================================= */
-
-  function setupTouchControls(){
-
-    const pad =
-
-      $('touchMove');
-
-    const stick =
-
-      $('touchStick');
-
-    let active = false;
-
-    let centerX = 0;
-
-    let centerY = 0;
-
-    pad.addEventListener(
-
-      'pointerdown',
-
-      e => {
-
-        active = true;
-
-        const r =
-
-          pad.getBoundingClientRect();
-
-        centerX =
-
-          r.left + r.width/2;
-
-        centerY =
-
-          r.top + r.height/2;
-
-        updateStick(
-
-          e.clientX,
-
-          e.clientY
-
-        );
-
-        pad.setPointerCapture?.(
-
-          e.pointerId
-
-        );
-
-      }
-
-    );
-
-    pad.addEventListener(
-
-      'pointermove',
-
-      e => {
-
-        if(active){
-
-          updateStick(
-
-            e.clientX,
-
-            e.clientY
-
-          );
-
+        const dt = Math.min(clock.getDelta(), 0.033);
+
+        if (running && !paused) {
+          const speed = 4.5;
+          const forward = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+          const strafe = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+
+          moveX = strafe;
+          moveZ = forward;
+
+          const len = Math.hypot(moveX, moveZ) || 1;
+          const dx = (moveX / len) * speed * dt;
+          const dz = (moveZ / len) * speed * dt;
+
+          player.position.x += dx;
+          player.position.z += dz;
+          player.position.x = Math.max(-12, Math.min(12, player.position.x));
+          player.position.z = Math.max(-12, Math.min(12, player.position.z));
+
+          const targetX = player.position.x + Math.sin(camYaw) * 8;
+          const targetZ = player.position.z + Math.cos(camYaw) * 8;
+
+          camera.position.x += (player.position.x + Math.sin(camYaw) * 7 - camera.position.x) * 0.09;
+          camera.position.z += (player.position.z + Math.cos(camYaw) * 7 - camera.position.z) * 0.09;
+          camera.position.y = 2.7 + Math.sin(camPitch) * 1.8;
+          camera.lookAt(player.position.x, player.position.y + 1.3, player.position.z);
+
+          stats.hunger = Math.max(0, stats.hunger - dt * 0.8);
+          stats.thirst = Math.max(0, stats.thirst - dt * 1.0);
+          stats.energy = Math.min(100, stats.energy + dt * 0.35);
+          updateHud();
         }
 
-      }
-
-    );
-
-    function stop(){
-
-      active = false;
-
-      stick.style.transform =
-
-        'translate(0,0)';
-
-      keys.KeyW = false;
-
-      keys.KeyA = false;
-
-      keys.KeyS = false;
-
-      keys.KeyD = false;
-
-    }
-
-    pad.addEventListener(
-
-      'pointerup',
-
-      stop
-
-    );
-
-    pad.addEventListener(
-
-      'pointercancel',
-
-      stop
-
-    );
-
-    function updateStick(x,y){
-
-      let dx =
-
-        x-centerX;
-
-      let dy =
-
-        y-centerY;
-
-      const max = 42;
-
-      const len =
-
-        Math.hypot(
-
-          dx,
-
-          dy
-
-        );
-
-      if(len > max){
-
-        dx =
-
-          dx/len*max;
-
-        dy =
-
-          dy/len*max;
-
-      }
-
-      stick.style.transform =
-
-        `translate(${dx}px,${dy}px)`;
-
-      keys.KeyW =
-
-        dy < -10;
-
-      keys.KeyS =
-
-        dy > 10;
-
-      keys.KeyA =
-
-        dx < -10;
-
-      keys.KeyD =
-
-        dx > 10;
-
-    }
-
-  }
-
-  /* =========================================================
-
-     RESIZE
-
-     ========================================================= */
-
-  function onResize(){
-
-    if(!camera || !renderer){
-
-      return;
-
-    }
-
-    camera.aspect =
-
-      innerWidth/innerHeight;
-
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(
-
-      innerWidth,
-
-      innerHeight
-
-    );
-
-  }
-
-  /* =========================================================
-
-     PLAYER MOVEMENT
-
-     ========================================================= */
-
-  function updatePlayer(dt){
-
-    if(!player){
-
-      return;
-
-    }
-
-    let x = 0;
-
-    let z = 0;
-
-    if(
-
-      keys.KeyW ||
-
-      keys.ArrowUp
-
-    ){
-
-      z -= 1;
-
-    }
-
-    if(
-
-      keys.KeyS ||
-
-      keys.ArrowDown
-
-    ){
-
-      z += 1;
-
-    }
-
-    if(
-
-      keys.KeyA ||
-
-      keys.ArrowLeft
-
-    ){
-
-      x -= 1;
-
-    }
-
-    if(
-
-      keys.KeyD ||
-
-      keys.ArrowRight
-
-    ){
-
-      x += 1;
-
-    }
-
-    const len =
-
-      Math.hypot(
-
-        x,
-
-        z
-
-      );
-
-    if(len > 0){
-
-      x /= len;
-
-      z /= len;
-
-      const speed = 3.2;
-
-      player.position.x +=
-
-        x * speed * dt;
-
-      player.position.z +=
-
-        z * speed * dt;
-
-      player.rotation.y =
-
-        Math.atan2(
-
-          x,
-
-          z
-
-        );
-
-      stats.energy =
-
-        Math.max(
-
-          0,
-
-          stats.energy-dt*1.3
-
-        );
-
-      stats.hunger =
-
-        Math.max(
-
-          0,
-
-          stats.hunger-dt*.35
-
-        );
-
-      stats.thirst =
-
-        Math.max(
-
-          0,
-
-          stats.thirst-dt*.55
-
-        );
-
-    }else{
-
-      stats.energy =
-
-        Math.min(
-
-          100,
-
-          stats.energy+dt*.4
-
-        );
-
-    }
-
-    /*
-
-    TEMPORARY DEN BOUNDARY
-
-    Later this should be replaced by
-
-    actual collision geometry.
-
-    */
-
-    player.position.x =
-
-      Math.max(
-
-        -7,
-
-        Math.min(
-
-          7,
-
-          player.position.x
-
-        )
-
-      );
-
-    player.position.z =
-
-      Math.max(
-
-        -6,
-
-        Math.min(
-
-          7,
-
-          player.position.z
-
-        )
-
-      );
-
-    animateLegs(
-
-      dt,
-
-      len > 0
-
-    );
-
-  }
-
-  /* =========================================================
-
-     LEG ANIMATION
-
-     ========================================================= */
-
-  function animateLegs(
-
-    dt,
-
-    moving
-
-  ){
-
-    if(!player){
-
-      return;
-
-    }
-
-    const speed =
-
-      moving
-
-        ? 8
-
-        : 2;
-
-    for(
-
-      let i=3;
-
-      i<player.children.length;
-
-      i++
-
-    ){
-
-      const leg =
-
-        player.children[i];
-
-      const side =
-
-        i%2===0
-
-          ? -1
-
-          : 1;
-
-      leg.rotation.y +=
-
-        dt *
-
-        speed *
-
-        side *
-
-        .15;
-
-      leg.position.y =
-
-        .75 +
-
-        Math.sin(
-
-          performance.now()*.008+i
-
-        )*.025;
-
-    }
-
-  }
-
-  /* =========================================================
-
-     CAMERA
-
-     ========================================================= */
-
-  function updateCamera(){
-
-    if(!player || !camera){
-
-      return;
-
-    }
-
-    const target =
-
-      new THREE.Vector3(
-
-        player.position.x,
-
-        player.position.y+1.25,
-
-        player.position.z
-
-      );
-
-    const horizontal =
-
-      Math.cos(camPitch)*camDist;
-
-    camera.position.set(
-
-      target.x +
-
-        Math.sin(camYaw)*
-
-        horizontal,
-
-      target.y +
-
-        Math.sin(camPitch)*
-
-        camDist,
-
-      target.z +
-
-        Math.cos(camYaw)*
-
-        horizontal
-
-    );
-
-    camera.lookAt(
-
-      target
-
-    );
-
-  }
-
-  /* =========================================================
-
-     INTERACTION
-
-     ========================================================= */
-
-  function interact(){
-
-    if(!player){
-
-      return;
-
-    }
-
-    /*
-
-    WATER
-
-    */
-
-    const nearWater =
-
-      player.position.distanceTo(
-
-        new THREE.Vector3(
-
-          -4.3,
-
-          player.position.y,
-
-          1.5
-
-        )
-
-      ) < 2;
-
-    /*
-
-    WEB
-
-    */
-
-    const nearWeb =
-
-      player.position.distanceTo(
-
-        new THREE.Vector3(
-
-          0,
-
-          player.position.y,
-
-          -2
-
-        )
-
-      ) < 2.5;
-
-    if(nearWater){
-
-      stats.thirst = 100;
-
-      toast(
-
-        'Ты напился воды.'
-
-      );
-
-    }
-
-    else if(nearWeb){
-
-      stats.energy = 100;
-
-      toast(
-
-        'Ты отдохнул в паутине.'
-
-      );
-
-    }
-
-    else{
-
-      stats.hunger =
-
-        Math.min(
-
-          100,
-
-          stats.hunger+25
-
-        );
-
-      toast(
-
-        'Ты съел добычу.'
-
-      );
-
-    }
-
-  }
-
-  /* =========================================================
-
-     STATS
-
-     ========================================================= */
-
-  function resetStats(){
-
-    stats.hunger = 100;
-
-    stats.thirst = 100;
-
-    stats.energy = 100;
-
-  }
-
-  /* =========================================================
-
-     SAVE
-
-     ========================================================= */
-
-  function saveGame(){
-
-    if(
-
-      !gameInitialized ||
-
-      !player
-
-    ){
-
-      return;
-
-    }
-
-    localStorage.setItem(
-
-      'nestborn_v4_save',
-
-      JSON.stringify({
-
-        position:{
-
-          x:player.position.x,
-
-          y:player.position.y,
-
-          z:player.position.z
-
-        },
-
-        stats:{
-
-          ...stats
-
-        },
-
-        camera:{
-
-          yaw:camYaw,
-
-          pitch:camPitch,
-
-          dist:camDist
-
+        if (scene.children.length > 0) {
+          scene.rotation.y += 0.0006;
         }
 
-      })
-
-    );
-
-    toast(
-
-      'Логово сохранено.'
-
-    );
-
-  }
-
-  /* =========================================================
-
-     LOAD
-
-     ========================================================= */
-
-  function loadGame(){
-
-    resetStats();
-
-    try{
-
-      const raw =
-
-        localStorage.getItem(
-
-          'nestborn_v4_save'
-
-        );
-
-      if(!raw){
-
-        return;
-
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
       }
 
-      const data =
+      function enterGame(loadSave) {
+        if (gameStarting || gameInitialized) return;
 
-        JSON.parse(raw);
+        gameStarting = true;
+        setLobbyBusy(true);
+        $('error').style.display = 'none';
 
-      if(
+        setTimeout(() => {
+          try {
+            if (typeof THREE === 'undefined') {
+              throw new Error('Three.js не загрузился.');
+            }
 
-        data.position &&
+            setupGame();
+            if (loadSave) {
+              loadGame();
+            } else {
+              resetStats();
+            }
 
-        player
+            gameInitialized = true;
+            running = true;
+            paused = false;
 
-      ){
+            $('lobby').style.display = 'none';
+            $('hud').style.display = 'block';
 
-        player.position.set(
-
-          Number(data.position.x)||0,
-
-          Number(data.position.y)||1,
-
-          Number(data.position.z)||3.5
-
-        );
-
+            startLoopOnce();
+            toast('Добро пожаловать домой.');
+          } catch (err) {
+            console.error('[NESTBORN v4]', err);
+            showError(err && err.message ? err.message : String(err));
+          } finally {
+            gameStarting = false;
+            setLobbyBusy(false);
+          }
+        }, 30);
       }
 
-      if(data.stats){
-
-        stats.hunger =
-
-          clamp(
-
-            Number(data.stats.hunger),
-
-            0,
-
-            100
-
-          );
-
-        stats.thirst =
-
-          clamp(
-
-            Number(data.stats.thirst),
-
-            0,
-
-            100
-
-          );
-
-        stats.energy =
-
-          clamp(
-
-            Number(data.stats.energy),
-
-            0,
-
-            100
-
-          );
-
-      }
-
-      if(data.camera){
-
-        camYaw =
-
-          Number(data.camera.yaw)||0;
-
-        camPitch =
-
-          Number(data.camera.pitch)||.34;
-
-        camDist =
-
-          clamp(
-
-            Number(data.camera.dist)||7,
-
-            3.8,
-
-            11
-
-          );
-
-      }
-
-      toast(
-
-        'Сохранение загружено.'
-
-      );
-
-    }catch(e){
-
-      console.warn(
-
-        'Save load failed:',
-
-        e
-
-      );
-
-      toast(
-
-        'Сохранение не удалось прочитать.'
-
-      );
-
-    }
-
-  }
-
-  function clamp(
-
-    v,
-
-    min,
-
-    max
-
-  ){
-
-    if(!Number.isFinite(v)){
-
-      return min;
-
-    }
-
-    return Math.max(
-
-      min,
-
-      Math.min(
-
-        max,
-
-        v
-
-      )
-
-    );
-
-  }
-
-  /* =========================================================
-
-     HUD
-
-     ========================================================= */
-
-  function updateHUD(){
-
-    const values = [
-
-      [
-
-        'hunger',
-
-        stats.hunger
-
-      ],
-
-      [
-
-        'thirst',
-
-        stats.thirst
-
-      ],
-
-      [
-
-        'energy',
-
-        stats.energy
-
-      ]
-
-    ];
-
-    for(
-
-      const [name,value]
-
-      of values
-
-    ){
-
-      $(name+'Text').textContent =
-
-        Math.round(value);
-
-      $(name+'Fill').style.width =
-
-        clamp(
-
-          value,
-
-          0,
-
-          100
-
-        ) + '%';
-
-    }
-
-  }
-
-  /* =========================================================
-
-     TOAST
-
-     ========================================================= */
-
-  let toastTimer = 0;
-
-  function toast(message){
-
-    const el =
-
-      $('toast');
-
-    el.textContent =
-
-      message;
-
-    el.style.opacity =
-
-      '1';
-
-    clearTimeout(
-
-      toastTimer
-
-    );
-
-    toastTimer =
-
-      setTimeout(
-
-        () => {
-
-          el.style.opacity =
-
-            '0';
-
-        },
-
-        1800
-
-      );
-
-  }
-
-  /* =========================================================
-
-     SINGLE GAME LOOP
-
-     ========================================================= */
-
-  function gameLoop(now){
-
-    /*
-
-    Следующий кадр.
-
-    */
-
-    requestAnimationFrame(
-
-      gameLoop
-
-    );
-
-    /*
-
-    Если WebGL ещё не создан —
-
-    просто ничего не делаем.
-
-    */
-
-    if(
-
-      !renderer ||
-
-      !scene ||
-
-      !camera
-
-    ){
-
-      return;
-
-    }
-
-    const dt =
-
-      Math.min(
-
-        .05,
-
-        Math.max(
-
-          0,
-
-          (now-last)/1000
-
-        )
-
-      );
-
-    last = now;
-
-    if(
-
-      running &&
-
-      !paused
-
-    ){
-
-      updatePlayer(dt);
-
-      updateCamera();
-
-      updateHUD();
-
-    }
-
-    renderer.render(
-
-      scene,
-
-      camera
-
-    );
-
-  }
-
-})();
-
-</script>
-
+      document.addEventListener('keydown', (e) => {
+        keys[e.code] = true;
+        if (e.code === 'KeyF' && !e.repeat) fullscreen();
+        if (e.code === 'KeyS' && !e.repeat) saveGame();
+      });
+
+      document.addEventListener('keyup', (e) => {
+        keys[e.code] = false;
+      });
+
+      document.addEventListener('pointermove', (e) => {
+        if (!running || !player) return;
+        const x = (e.clientX / window.innerWidth) * 2 - 1;
+        const y = (e.clientY / window.innerHeight) * 2 - 1;
+        camYaw = x * 1.7;
+        camPitch = THREE.MathUtils.clamp(0.5 + y * 0.8, 0.2, 1.2);
+      });
+
+      window.addEventListener('resize', () => {
+        if (!renderer || !camera) return;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      $('start').addEventListener('click', () => enterGame(false));
+      $('continue').addEventListener('click', () => enterGame(true));
+      $('fullLobby').addEventListener('click', fullscreen);
+      $('fs').addEventListener('click', fullscreen);
+      $('save').addEventListener('click', saveGame);
+
+      updateHud();
+    })();
+  </script>
 </body>
-
 </html>
